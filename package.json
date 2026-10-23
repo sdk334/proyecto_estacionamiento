@@ -1,0 +1,26 @@
+{
+  "name": "park10-iot-suite",
+  "version": "1.0.0",
+  "description": "Suite de Control de Estacionamiento por QR e IoT (Cliente y Tótem)",
+  "scripts": {
+    "start": "python -m http.server 8080 -d cliente-app",
+    "start:cliente": "python -m http.server 8080 -d cliente-app",
+    "start:totem": "python -m http.server 8081 -d totem-app",
+    "sync:cliente": "powershell -Command \"Copy-Item cliente-app/index.html, cliente-app/styles.css, cliente-app/app.js, cliente-app/qr-scanner.js, cliente-app/iot-service.js, cliente-app/firebase-service.js, cliente-app/qrcode.bundle.js, cliente-app/jsqr.bundle.js -Destination cliente-app/android/app/src/main/assets/ -Force\"",
+    "sync:totem": "powershell -Command \"Copy-Item totem-app/index.html, totem-app/totem.js, totem-app/styles.css, totem-app/escpos-printer.js, totem-app/firebase-totem.js, totem-app/qrcode.bundle.js -Destination totem-app/android/app/src/main/assets/ -Force\"",
+    "sync:all": "npm run sync:cliente && npm run sync:totem"
+  },
+  "keywords": [
+    "iot",
+    "parking",
+    "android",
+    "qr-code",
+    "totem"
+  ],
+  "author": "PARK / 10",
+  "license": "MIT",
+  "dependencies": {
+    "jsqr": "^1.4.0",
+    "qrcode": "^1.5.4"
+  }
+}

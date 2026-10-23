@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Android / Gradle
+.gradle/
+build/
+*/build/
+*/*/build/
+*/*/*/build/
+*.apk
+*.aab
+local.properties
+.cxx/
+
+# IDEs & Editors
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

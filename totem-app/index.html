@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PARK / 10 - Tótem de Entrada con Impresora Térmica</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <div class="totem-kiosk-container">
+
+    <!-- Barra Superior: Estado de Impresora y Configuración -->
+    <header class="totem-top-bar">
+      <div class="brand-group">
+        <span class="app-badge">PARK / 10</span>
+        <span class="brand-subtitle">TÓTEM DE ENTRADA INTELIGENTE</span>
+      </div>
+
+      <div class="system-status-group">
+        <div id="printer-status-pill" class="status-indicator-pill connecting">
+          <span class="status-pulse-dot"></span>
+          <span id="printer-status-text">Buscando impresora Bluetooth...</span>
+        </div>
+        <button id="btn-open-settings" class="icon-tool-btn" title="Configurar Impresora y Firebase">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- Contenido Principal: Dashboard Horizontal Kiosko (2 Columnas) -->
+    <main class="totem-main-view">
+
+      <!-- Columna Izquierda: Información de Disponibilidad y Guía de Pasos -->
+      <div class="totem-col-info">
+        <section class="live-availability-card">
+          <p class="card-caption">ESTADO DEL ESTACIONAMIENTO</p>
+          <div class="spots-big-counter">
+            <span class="counter-number" id="totem-free-spots">06</span>
+            <span class="counter-slash">/ 10</span>
+          </div>
+          <p class="counter-sublabel">Lugares disponibles ahora</p>
+        </section>
+
+        <section class="totem-instructions-card">
+          <div class="info-step">
+            <span class="step-badge">1</span>
+            <span class="step-text">Presiona el botón para emitir tu ticket.</span>
+          </div>
+          <div class="info-step">
+            <span class="step-badge">2</span>
+            <span class="step-text">Consérvalo y escanea el QR con la app móvil.</span>
+          </div>
+          <div class="info-step">
+            <span class="step-badge">3</span>
+            <span class="step-text">Paga en la app y tendrás 20 min para salir.</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Columna Derecha: Botón Gigante de Acceso y Ranura de Impresión -->
+      <div class="totem-col-action">
+        <!-- BOTÓN GIGANTE DE ACCESO / EXPEDICIÓN DE TICKET -->
+        <section class="kiosk-action-section">
+          <button id="btn-issue-ticket" class="btn-giant-touch">
+            <div class="giant-btn-content">
+              <span class="giant-btn-icon">🎟️</span>
+              <div class="giant-btn-texts">
+                <span class="giant-btn-title">TOCA AQUÍ PARA ENTRAR</span>
+                <span class="giant-btn-sub">Imprimir ticket con código QR de acceso</span>
+              </div>
+            </div>
+            <div class="giant-btn-shine"></div>
+          </button>
+        </section>
+
+        <!-- ANIMACIÓN DE IMPRESIÓN Y SALIDA DE TICKET -->
+        <div id="dispensing-card" class="ticket-dispensing-card" style="display: none;">
+          <div class="dispensing-slot-mouth"></div>
+          <div class="paper-ticket-animation">
+            <div class="ticket-paper-head">
+              <span class="ticket-paper-logo">PARK / 10</span>
+              <span id="dispensing-ticket-id" class="ticket-paper-code">#ET-00042</span>
+            </div>
+            <div class="ticket-paper-qr-preview">
+              <canvas id="totem-preview-qr" width="100" height="100"></canvas>
+            </div>
+            <p class="ticket-paper-footer">Tome su ticket para abrir la pluma</p>
+          </div>
+          <p class="dispensing-status-msg">🖨️ Imprimiendo en impresora térmica...</p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- MODAL DE CONFIGURACIÓN (BLUETOOTH Y FIREBASE) -->
+    <div id="settings-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Configuración del Tótem</h3>
+          <button id="btn-close-settings" class="modal-close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Sección Bluetooth -->
+          <div class="form-group">
+            <label>Impresora Térmica Bluetooth (ESC/POS):</label>
+            <div style="display: flex; gap: 8px;">
+              <select id="select-bt-devices" class="form-select">
+                <option value="">Seleccionar impresora vinculada...</option>
+              </select>
+              <button id="btn-refresh-bt" class="btn-subtle">Buscar</button>
+            </div>
+            <button id="btn-connect-printer" class="btn-dark" style="margin-top: 8px;">
+              Conectar Impresora
+            </button>
+          </div>
+
+          <hr class="divider-line">
+
+          <!-- Prueba de Impresión -->
+          <div class="form-group">
+            <label>Prueba de Hardware:</label>
+            <button id="btn-test-print" class="btn-lime">
+              🖨️ Imprimir Ticket de Prueba
+            </button>
+          </div>
+
+          <hr class="divider-line">
+
+          <!-- Configuración de Firebase -->
+          <div class="form-group">
+            <label>URL de Firebase Realtime Database:</label>
+            <input type="text" id="input-firebase-url" class="form-input" placeholder="https://tu-proyecto.firebaseio.com">
+            <button id="btn-save-firebase" class="btn-subtle" style="margin-top: 8px;">
+              Guardar Firebase
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast de Notificación -->
+    <div id="totem-toast" class="totem-toast">
+      <span id="totem-toast-msg">Mensaje</span>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="qrcode.bundle.js"></script>
+  <script src="escpos-printer.js"></script>
+  <script src="firebase-totem.js"></script>
+  <script src="totem.js"></script>
+</body>
+
+</html>

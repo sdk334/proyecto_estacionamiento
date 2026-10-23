@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PARK 10 Tótem</string>
+    <string name="bluetooth_permission_required">Se requiere permiso de Bluetooth para conectar la impresora térmica.</string>
+</resources>

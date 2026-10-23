@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PARK / 10</string>
+    <string name="camera_permission_required">Se requiere permiso de cámara para escanear tickets QR de estacionamiento.</string>
+</resources>

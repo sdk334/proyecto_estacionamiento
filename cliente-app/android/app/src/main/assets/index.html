@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PARK / 10 - Control de Estacionamiento por QR</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- ========================================================================
+       CHASIS DEL TELÉFONO MÓVIL
+       ======================================================================== -->
+  <div class="phone-mockup-frame">
+    <div class="phone-screen" id="app-container">
+
+      <!-- Notificación Toast Flotante -->
+      <div id="interactive-toast" class="toast-notification">
+        <span class="toast-dot"></span>
+        <span id="toast-message">Acción completada</span>
+      </div>
+
+      <!-- Barra de Estado Móvil (Status Bar: 9:41 · ● - ▌) -->
+      <div class="phone-status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <span class="icon-dot"></span>
+          <span class="icon-dash"></span>
+          <span class="icon-battery-pill"></span>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           PANTALLA 1: INICIO (MAPA DE LUGARES)
+           ==================================================================== -->
+      <div id="screen-inicio" class="phone-content screen-view active-screen">
+        <header class="screen-header">
+          <span class="app-category-badge">PARK / 10</span>
+          <h2 class="screen-title">Inicio</h2>
+          <p class="screen-subtitle">Espacios disponibles ahora</p>
+        </header>
+
+        <!-- Contador Grande de Lugares Libres -->
+        <div class="hero-counter-section">
+          <div class="counter-digits-wrapper">
+            <span class="counter-big-number" id="display-free-spots">06</span>
+            <span class="counter-total-fraction">/ 10</span>
+          </div>
+          <p class="counter-caption">lugares libres</p>
+        </div>
+
+        <hr class="divider-line">
+
+        <!-- Mapa de Lugares -->
+        <div class="map-section-wrapper">
+          <h3 class="section-label">Mapa de lugares</h3>
+
+          <div class="map-legend">
+            <div class="legend-item">
+              <span>LIBRE</span>
+              <span class="legend-dot free"></span>
+            </div>
+            <div class="legend-item">
+              <span>OCUPADO</span>
+              <span class="legend-dot occupied"></span>
+            </div>
+          </div>
+
+          <!-- Cuadrícula del Estacionamiento -->
+          <div class="parking-map-card">
+            <div class="parking-grid">
+              <!-- Fila 1: 07, 06, 05, 04 -->
+              <div class="parking-spot free" data-spot="07">07</div>
+              <div class="parking-spot occupied" data-spot="06">06</div>
+              <div class="parking-spot free" data-spot="05">05</div>
+              <div class="parking-spot free" data-spot="04">04</div>
+
+              <!-- Fila 2: 08 y 03 -->
+              <div class="parking-spot free" data-spot="08">08</div>
+              <div class="parking-spot occupied" data-spot="03" style="grid-column: 4;">03</div>
+
+              <!-- Fila 3: 09 y 02 + Edificio Burk Khalifa -->
+              <div class="parking-spot occupied" data-spot="09">09</div>
+
+              <div class="map-center-building">
+                <span class="building-label">EDIFICIO</span>
+              </div>
+
+              <div class="parking-spot free" data-spot="02" style="grid-column: 4;">02</div>
+
+              <!-- Fila 4: 10 y 01 -->
+              <div class="parking-spot free" data-spot="10">10</div>
+              <div class="parking-spot occupied" data-spot="01" style="grid-column: 4;">01</div>
+
+              <!-- Fila 5: Indicadores de Salida y Entrada -->
+              <div class="lane-label lane-salida">SALIDA</div>
+              <div class="lane-label lane-entrada">ENTRADA</div>
+            </div>
+          </div>
+
+          <!-- Banner para escanear QR directamente desde Inicio -->
+          <div class="quick-scan-banner" id="banner-to-scan">
+            <div class="banner-text-group">
+              <span class="banner-title">¿Ya tienes tu ticket?</span>
+              <span class="banner-sub">Escanéalo para ver tu tiempo y costo</span>
+            </div>
+            <button class="banner-btn" id="btn-banner-scan">Escanear →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           PANTALLA 2: ESCANEAR QR
+           ==================================================================== -->
+      <div id="screen-escanear-qr" class="phone-content screen-view">
+        <header class="screen-header">
+          <span class="app-category-badge">PARK / 10</span>
+          <h2 class="screen-title">Escanear QR</h2>
+          <p class="screen-subtitle">Enfoca el ticket impreso</p>
+        </header>
+
+        <!-- Banner informativo si ya hay un ticket activo -->
+        <div id="active-ticket-scanner-banner" class="active-ticket-scanner-banner" style="display: none;">
+          <div class="active-banner-content">
+            <div class="active-banner-badge">
+              <span class="active-dot"></span>
+              <span id="active-banner-status-text">TICKET ACTIVO EN CURSO</span>
+            </div>
+            <span class="active-banner-title" id="active-banner-ticket-info">#ET-00042 · Cajón 06</span>
+            <p class="active-banner-desc">No se puede registrar otro ticket hasta finalizar esta estancia.</p>
+          </div>
+          <button id="btn-banner-go-estatus" class="btn-banner-action">Ver ticket →</button>
+        </div>
+
+        <!-- Visor de Cámara Real para Android 14 y Web -->
+        <div class="camera-scanner-container">
+          <div class="camera-viewfinder-frame" id="camera-viewfinder">
+            <!-- Video real de la cámara del teléfono -->
+            <video id="camera-video-stream" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; border-radius: 18px; position: absolute; top: 0; left: 0; z-index: 1; display: none;"></video>
+            <canvas id="qr-scan-canvas" style="display: none;"></canvas>
+
+            <div class="scanner-laser-beam" id="scanner-laser" style="z-index: 2;"></div>
+
+            <div class="qr-preview-dummy" id="qr-dummy-grid" style="z-index: 0;">
+              <div class="qr-dummy-block"></div>
+              <div></div>
+              <div class="qr-dummy-block"></div>
+              <div class="qr-dummy-block"></div>
+              <div></div>
+              <div></div>
+              <div class="qr-dummy-block"></div>
+              <div></div>
+              <div></div>
+              <div class="qr-dummy-block"></div>
+              <div class="qr-dummy-block"></div>
+              <div></div>
+              <div class="qr-dummy-block"></div>
+              <div class="qr-dummy-block"></div>
+              <div></div>
+              <div></div>
+              <div class="qr-dummy-block"></div>
+              <div></div>
+              <div class="qr-dummy-block"></div>
+              <div class="qr-dummy-block"></div>
+              <div class="qr-dummy-block"></div>
+              <div></div>
+              <div class="qr-dummy-block"></div>
+              <div></div>
+              <div class="qr-dummy-block"></div>
+            </div>
+
+            <!-- Botón de linterna en Android -->
+            <button id="btn-toggle-torch" style="display: none; position: absolute; top: 12px; right: 12px; z-index: 10; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 20px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer;">
+              ⚡ Flash
+            </button>
+          </div>
+        </div>
+
+        <!-- Instrucciones -->
+        <div class="scan-instructions-list">
+          <div class="instruction-row">
+            <span class="instruction-step">01</span>
+            <span class="instruction-text">Toma el ticket impreso.</span>
+          </div>
+          <div class="instruction-row">
+            <span class="instruction-step">02</span>
+            <span class="instruction-text">Escanéalo para consultar tu tiempo.</span>
+          </div>
+        </div>
+
+        <button id="btn-start-camera" class="btn-primary-dark">
+          <span>Abrir cámara para escanear</span>
+        </button>
+
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <input type="file" id="input-qr-file" accept="image/*" style="display: none;">
+          <button id="btn-upload-qr" style="flex: 1; background: var(--color-surface-gray); border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); border-radius: 12px; padding: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>📷 Subir foto de ticket</span>
+          </button>
+        </div>
+
+        <div class="manual-ticket-box">
+          <span class="manual-ticket-title">¿Cámara dañada o ticket arrugado?</span>
+          <div class="manual-input-group">
+            <input type="text" id="input-manual-ticket" class="manual-ticket-input" placeholder="#ET-00042" value="#ET-00042">
+            <button id="btn-submit-manual-ticket" class="manual-ticket-btn">Consultar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           PANTALLA 3: TU TICKET (CONSULTA DE ACCESO - PENDIENTE DE PAGO)
+           ==================================================================== -->
+      <div id="screen-tu-ticket" class="phone-content screen-view">
+        <button class="screen-back-link" id="btn-back-to-scanner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          <span>Volver al escáner</span>
+        </button>
+
+        <header class="screen-header">
+          <span class="app-category-badge">PARK / 10</span>
+          <h2 class="screen-title">Tu ticket</h2>
+          <p class="screen-subtitle">Consulta de acceso</p>
+        </header>
+
+        <div class="ticket-badge-pill badge-pending">
+          <span class="badge-dot"></span>
+          <span>PENDIENTE DE PAGO</span>
+        </div>
+
+        <div class="ticket-header-group">
+          <h3 class="ticket-code-id">#ET-00042</h3>
+          <p class="ticket-entry-meta">Entrada · hoy a las 09:10</p>
+        </div>
+
+        <!-- Código QR activo del ticket -->
+        <div class="ticket-qr-display-card">
+          <canvas id="unpaid-ticket-qr-canvas" width="150" height="150"></canvas>
+          <p class="qr-scan-hint">Ticket emitido en cajón de estacionamiento</p>
+        </div>
+
+        <hr class="divider-line">
+
+        <div class="ticket-metric-block">
+          <p class="metric-label-title">Tiempo transcurrido</p>
+          <h4 class="metric-huge-value">00:42</h4>
+        </div>
+
+        <hr class="divider-line">
+
+        <div class="ticket-metric-block">
+          <p class="metric-label-title">Total estimado</p>
+          <h4 class="metric-huge-value">$20.00</h4>
+        </div>
+
+        <div class="ticket-actions-row">
+          <button id="btn-to-simulate-pay" class="btn-primary-dark">
+            <span>Simular pago</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           PANTALLA 4: SIMULAR PAGO (TRANSACCIÓN)
+           ==================================================================== -->
+      <div id="screen-simular-pago" class="phone-content screen-view">
+        <button class="screen-back-link" id="btn-back-to-ticket">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          <span>Volver a Tu ticket</span>
+        </button>
+
+        <header class="screen-header">
+          <span class="app-category-badge">PARK / 10</span>
+          <h2 class="screen-title">Simular pago</h2>
+          <p class="screen-subtitle">Transacción</p>
+        </header>
+
+        <div class="summary-table-section">
+          <h3 class="summary-heading">Resumen</h3>
+
+          <div class="summary-row">
+            <span class="summary-label">Ticket</span>
+            <span class="summary-value">#ET-00042</span>
+          </div>
+          <hr class="divider-line" style="margin: 0;">
+
+          <div class="summary-row">
+            <span class="summary-label">Tiempo</span>
+            <span class="summary-value">42 minutos</span>
+          </div>
+          <hr class="divider-line" style="margin: 0;">
+
+          <div class="summary-row">
+            <span class="summary-label">Entrada</span>
+            <span class="summary-value">09:10</span>
+          </div>
+          <hr class="divider-line" style="margin: 0;">
+
+          <div class="summary-total-container">
+            <span class="total-tag-label">TOTAL</span>
+            <span class="total-huge-amount">$20.00</span>
+          </div>
+        </div>
+
+        <button id="btn-confirm-pay" class="btn-primary-dark">
+          <span>Confirmar pago simulado</span>
+        </button>
+      </div>
+
+      <!-- ====================================================================
+           PANTALLA 5: TICKET PAGADO (PAGO COMPLETADO)
+           ==================================================================== -->
+      <div id="screen-ticket-pagado" class="phone-content screen-view">
+        <header class="screen-header">
+          <span class="app-category-badge">PARK / 10</span>
+          <h2 class="screen-title">Ticket pagado</h2>
+          <p class="screen-subtitle">Al volver a escanear el mismo QR</p>
+        </header>
+
+        <div class="ticket-badge-pill badge-completed">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>PAGO COMPLETADO</span>
+        </div>
+
+        <div class="ticket-header-group">
+          <h3 class="ticket-code-id">#ET-00042</h3>
+          <p class="ticket-entry-meta">Entrada · hoy 09:10</p>
+        </div>
+
+        <!-- Código QR validado para abrir la pluma de salida -->
+        <div class="ticket-qr-display-card">
+          <canvas id="paid-ticket-qr-canvas" width="170" height="170"></canvas>
+          <p class="qr-scan-hint">Presenta este código al lector de la pluma de salida</p>
+        </div>
+
+        <hr class="divider-line">
+
+        <!-- Pago registrado -->
+        <div class="ticket-metric-block">
+          <p class="metric-label-title">Pago registrado</p>
+          <h4 class="paid-timestamp-value">Hoy · 09:52</h4>
+        </div>
+
+        <hr class="divider-line">
+
+        <!-- Tiempo para salir del estacionamiento (20 minutos) -->
+        <div class="ticket-metric-block">
+          <p class="metric-label-title">Tiempo para salir del estacionamiento</p>
+          <h4 class="metric-huge-value" id="ticket-paid-countdown" style="color: #111815;">20:00</h4>
+          <p style="font-size: 13.5px; color: var(--color-text-secondary); margin-top: 6px;">
+            20 minutos de tolerancia · Límite: 10:12 hrs
+          </p>
+        </div>
+
+        <hr class="divider-line">
+
+        <!-- Acciones de navegación lógica -->
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 24px;">
+          <button id="btn-paid-to-estatus" class="btn-primary-dark">
+            <span>Ver estatus en vivo</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+          <button id="btn-paid-to-inicio"
+            style="background: var(--color-surface-gray); border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); border-radius: var(--radius-btn); padding: 14px; font-family: var(--font-family); font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+            <span>Volver al mapa de inicio</span>
+          </button>
+          <button id="btn-paid-finalize-stay" class="btn-finalize-stay">
+            <span>✅ Finalizar estancia / Salida realizada</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           PANTALLA 6: ESTATUS (ESTADO DE PAGO Y TIEMPO RESTANTE PARA SALIR)
+           ==================================================================== -->
+      <div id="screen-estatus" class="phone-content screen-view">
+        <header class="screen-header">
+          <span class="app-category-badge">PARK / 10</span>
+          <h2 class="screen-title">Estatus</h2>
+          <p class="screen-subtitle">Consulta de salida y pago</p>
+        </header>
+
+        <!-- VISTA ÚNICA DINÁMICA DEPENDIENDO DEL QR: SIN TICKET, PENDIENTE O PAGADO -->
+        <!-- VISTA C: SIN TICKET ACTIVO -->
+        <div id="estatus-view-empty" style="display: none; text-align: center; padding: 28px 12px;">
+          <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(206, 248, 71, 0.12); border: 1.5px solid rgba(206, 248, 71, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 30px;">
+            🅿️
+          </div>
+          <h3 style="font-size: 20px; font-weight: 800; color: var(--color-text-primary); margin-bottom: 8px;">Sin ticket activo</h3>
+          <p style="font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 24px; max-width: 290px; margin-left: auto; margin-right: auto;">
+            No tienes ninguna estancia de estacionamiento en curso. Escanea tu ticket impreso para consultar tu tiempo y pago.
+          </p>
+          <button id="btn-empty-scan-qr" class="btn-primary-dark">
+            <span>📷 Escanear ticket QR</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- VISTA A: SI NO ESTÁ PAGADO (CUÁNTO DEBE) -->
+        <div id="estatus-view-unpaid">
+          <div class="ticket-badge-pill badge-pending">
+            <span class="badge-dot"></span>
+            <span>PENDIENTE DE PAGO</span>
+          </div>
+
+          <div class="status-card-box unpaid-theme">
+            <p class="metric-label-title" style="color: #8C4040;">Monto a pagar</p>
+            <h4 class="metric-huge-value" style="color: #111815;">$20.00</h4>
+
+            <div class="status-detail-rows">
+              <div class="status-row-item">
+                <span class="label">Ticket</span>
+                <span class="val">#ET-00042</span>
+              </div>
+              <div class="status-row-item">
+                <span class="label">Lugar</span>
+                <span class="val">Cajón 06</span>
+              </div>
+              <div class="status-row-item">
+                <span class="label">Tiempo transcurrido</span>
+                <span class="val" id="estatus-unpaid-time">00:42 hrs (42 min)</span>
+              </div>
+              <div class="status-row-item">
+                <span class="label">Hora de entrada</span>
+                <span class="val">Hoy · 09:10</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="status-notice-banner notice-unpaid">
+            <span>⚠️</span>
+            <span>Debes liquidar tu adeudo para que la pluma de salida se abra automáticamente al escanear tu
+              ticket.</span>
+          </div>
+
+          <button id="btn-estatus-pay-now" class="btn-primary-dark">
+            <span>Pagar ticket ahora ($20.00)</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+
+          <button id="btn-estatus-discard-unpaid"
+            style="margin-top: 10px; width: 100%; background: transparent; border: 1px dashed var(--color-border-card); color: var(--color-text-secondary); border-radius: var(--radius-btn); padding: 12px; font-family: var(--font-family); font-size: 13px; font-weight: 600; cursor: pointer;">
+            <span>🗑️ Descartar estancia actual</span>
+          </button>
+        </div>
+
+        <!-- VISTA B: SI SÍ ESTÁ PAGADO (CUÁNTO TIEMPO LE QUEDA PARA SALIR) -->
+        <div id="estatus-view-paid" style="display: none;">
+          <div class="ticket-badge-pill badge-completed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>PAGO COMPLETADO</span>
+          </div>
+
+          <div class="status-card-box paid-theme">
+            <p class="metric-label-title" style="color: #2F4D20;">Tiempo para salir (20 min tolerancia)</p>
+            <h4 class="metric-huge-value" id="countdown-exit-timer" style="color: #111815;">20:00</h4>
+
+            <div class="status-detail-rows">
+              <div class="status-row-item">
+                <span class="label">Ticket</span>
+                <span class="val">#ET-00042</span>
+              </div>
+              <div class="status-row-item">
+                <span class="label">Lugar</span>
+                <span class="val">Cajón 06</span>
+              </div>
+              <div class="status-row-item">
+                <span class="label">Hora límite de salida</span>
+                <span class="val">Hasta las 10:12 hrs</span>
+              </div>
+              <div class="status-row-item">
+                <span class="label">Pago liquidado</span>
+                <span class="val">$20.00 (Hoy · 09:52)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="status-notice-banner notice-paid">
+            <span>✅</span>
+            <span>Tu salida está autorizada. Dirígete a la pluma y escanea tu ticket antes de que expire el tiempo de
+              tolerancia.</span>
+          </div>
+
+          <button id="btn-estatus-view-qr" class="btn-primary-dark">
+            <span>Ver ticket QR de salida</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+
+          <button id="btn-estatus-finalize-paid" class="btn-finalize-stay" style="margin-top: 10px;">
+            <span>✅ Finalizar estancia / Salida completada</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ====================================================================
+           BARRA DE NAVEGACIÓN INFERIOR (INICIO · QR · ESTATUS)
+           ==================================================================== -->
+      <nav class="phone-bottom-nav">
+        <button class="nav-tab-item active" data-tab="inicio">Inicio</button>
+        <button class="nav-tab-item" data-tab="qr">QR</button>
+        <button class="nav-tab-item" data-tab="estatus">Estatus</button>
+      </nav>
+
+      <!-- Modal de Bloqueo: Ticket Activo en Curso -->
+      <div id="modal-active-ticket-blocked" class="custom-modal-overlay" style="display: none;">
+        <div class="custom-modal-card">
+          <div class="modal-icon-badge warning" id="modal-blocked-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3 class="modal-title" id="modal-blocked-title">Ticket activo en curso</h3>
+          <div class="modal-ticket-chip" id="modal-blocked-chip">#ET-00042 · Cajón 06</div>
+          <p class="modal-description" id="modal-blocked-description">
+            Actualmente tienes un ticket activo en el estacionamiento. Por seguridad, el sistema no permite escanear más de un ticket a la vez.
+          </p>
+          <div class="modal-actions-list">
+            <button id="btn-modal-view-active" class="btn-primary-dark">
+              <span>Ver mi ticket activo</span>
+            </button>
+            <button id="btn-modal-finalize-active" class="btn-modal-secondary">
+              <span id="btn-modal-finalize-text">Finalizar estancia anterior</span>
+            </button>
+            <button id="btn-modal-close" class="btn-modal-ghost">
+              <span>Cerrar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Librerías offline para generación y lectura de códigos QR -->
+  <script src="qrcode.bundle.js"></script>
+  <script src="jsqr.bundle.js"></script>
+  <!-- Sincronización en tiempo real con Firebase Realtime Database -->
+  <script src="firebase-service.js"></script>
+  <!-- Scripts del Sistema IoT y Lector QR Real -->
+  <script src="iot-service.js"></script>
+  <script src="qr-scanner.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

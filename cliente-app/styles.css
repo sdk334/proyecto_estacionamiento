@@ -1,0 +1,1264 @@
+/* ==========================================================================
+   PARK / 10 - Sistema de Control de Estacionamiento por QR (IoT App)
+   Diseño de Alta Fidelidad - Inicio, QR y Estatus
+   ========================================================================== */
+
+:root {
+  /* Paleta de Colores Exacta de los Mockups */
+  --color-lime: #CEF847;             /* Verde lima / chartreuse exacto */
+  --color-lime-hover: #bfe838;
+  
+  --color-bg-white: #FFFFFF;
+  --color-bg-canvas: #0c100e;        /* Fondo oscuro para centrar el smartphone */
+  --color-surface-gray: #F5F6F4;     /* Fondo de cards y bottom bar */
+  --color-surface-card: #FFFFFF;
+  --color-border-subtle: #ECEEEC;
+  --color-border-spot: #E3E5E3;
+  
+  /* Textos y contrastes */
+  --color-text-primary: #111815;     /* Casi negro carbón exacto */
+  --color-text-secondary: #6E7470;   /* Gris neutro para subtítulos y metadatos */
+  --color-brand-green: #183424;      /* PARK / 10 */
+  
+  /* Botones oscuros y cámara */
+  --color-btn-dark: #19241F;         /* Carbón oscuro casi negro con tinte verde */
+  --color-btn-dark-hover: #26352e;
+  --color-camera-bg: #18221D;
+  --color-camera-inner: #213229;
+  --color-camera-border: #3D5849;
+  
+  /* Estados de badges */
+  --color-badge-pending-bg: #EAF0E7;
+  --color-badge-pending-text: #183424;
+  --color-alert-unpaid-bg: #FDF3F3;
+  --color-alert-unpaid-text: #B83232;
+  
+  /* Tipografía */
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* Dimensiones y bordes */
+  --radius-phone: 48px;
+  --radius-card: 28px;
+  --radius-btn: 16px;
+  --radius-spot: 14px;
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   CHASIS DEL TELÉFONO (PHONE FRAME)
+   ========================================================================== */
+.phone-mockup-frame {
+  width: 392px;
+  height: 844px; /* Proporción estándar moderna iPhone 15/16 */
+  max-height: 96vh;
+  background: #000000;
+  border-radius: var(--radius-phone);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  position: relative;
+  padding: 12px;
+  border: 4px solid #2B312E;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.phone-mockup-frame::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: calc(var(--radius-phone) - 4px);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+
+/* Pantalla interna táctil */
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-white);
+  border-radius: calc(var(--radius-phone) - 12px);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+/* ==========================================================================
+   STATUS BAR (9:41 · ● - ▌)
+   ========================================================================== */
+.phone-status-bar {
+  height: 44px;
+  padding: 12px 26px 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+  background: var(--color-bg-white);
+  flex-shrink: 0;
+}
+
+.status-time {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.2px;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-primary);
+}
+
+.icon-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--color-text-primary);
+  border-radius: 50%;
+}
+
+.icon-dash {
+  width: 14px;
+  height: 3.5px;
+  background-color: var(--color-text-primary);
+  border-radius: 2px;
+}
+
+.icon-battery-pill {
+  width: 5px;
+  height: 12px;
+  background-color: var(--color-text-primary);
+  border-radius: 1.5px;
+}
+
+/* ==========================================================================
+   CONTENIDO DESPLAZABLE DEL TELÉFONO
+   ========================================================================== */
+.phone-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 24px 105px 24px;
+  position: relative;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.phone-content::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Encabezados estándar */
+.screen-header {
+  margin-bottom: 22px;
+}
+
+.app-category-badge {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-brand-green);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.screen-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+  margin-bottom: 6px;
+}
+
+.screen-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Divisores estándar */
+.divider-line {
+  height: 1px;
+  background-color: var(--color-border-subtle);
+  margin: 22px 0;
+  border: none;
+}
+
+/* Enlace / Botón de retroceso */
+.screen-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-family);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  margin-bottom: 12px;
+  padding: 4px 0;
+  transition: color 0.15s ease;
+}
+
+.screen-back-link:hover {
+  color: var(--color-text-primary);
+}
+
+/* Banner rápido en Inicio para escanear QR */
+.quick-scan-banner {
+  margin-top: 20px;
+  background: var(--color-btn-dark);
+  border-radius: var(--radius-btn);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(25, 36, 31, 0.18);
+}
+
+.banner-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.banner-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.banner-sub {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #9BA39F;
+}
+
+.banner-btn {
+  background: var(--color-lime);
+  color: #111815;
+  border: none;
+  font-family: var(--font-family);
+  font-size: 12.5px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.banner-btn:hover {
+  background: var(--color-lime-hover);
+  transform: translateY(-1px);
+}
+
+/* Botón de acción principal oscuro */
+.btn-primary-dark {
+  width: 100%;
+  background-color: var(--color-btn-dark);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: 18px 20px;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.2s ease;
+  box-shadow: 0 4px 14px rgba(25, 36, 31, 0.15);
+}
+
+.btn-primary-dark:hover {
+  background-color: var(--color-btn-dark-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary-dark:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   PANTALLA 1: INICIO (MAPA DE LUGARES)
+   ========================================================================== */
+.hero-counter-section {
+  margin-bottom: 22px;
+}
+
+.counter-digits-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.counter-big-number {
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-text-primary);
+  letter-spacing: -2px;
+}
+
+.counter-total-fraction {
+  font-size: 34px;
+  font-weight: 500;
+  color: #404542;
+  letter-spacing: -0.5px;
+}
+
+.counter-caption {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.section-label {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.2px;
+}
+
+.map-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.free {
+  background-color: var(--color-lime);
+}
+
+.legend-dot.occupied {
+  background-color: #6E7370;
+}
+
+.parking-map-card {
+  background-color: var(--color-surface-gray);
+  border-radius: var(--radius-card);
+  padding: 18px 16px;
+  position: relative;
+}
+
+.parking-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto auto auto auto auto;
+  gap: 12px 10px;
+  align-items: center;
+  justify-items: center;
+}
+
+.parking-spot {
+  width: 100%;
+  max-width: 66px;
+  height: 52px;
+  border-radius: var(--radius-spot);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.parking-spot.free {
+  background-color: var(--color-lime);
+  color: var(--color-text-primary);
+  border: none;
+  box-shadow: 0 2px 8px rgba(206, 248, 71, 0.35);
+}
+
+.parking-spot.occupied {
+  background-color: #FFFFFF;
+  color: #4C524E;
+  border: 1px solid var(--color-border-spot);
+}
+
+.parking-spot:active {
+  transform: scale(0.94);
+}
+
+.map-center-building {
+  grid-column: 2 / span 2;
+  grid-row: 2 / span 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 4px;
+}
+
+.building-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #6C736E;
+  letter-spacing: 0.6px;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.lane-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #6C736E;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.lane-salida {
+  grid-column: 1;
+  grid-row: 5;
+  justify-self: center;
+}
+
+.lane-entrada {
+  grid-column: 4;
+  grid-row: 5;
+  justify-self: center;
+}
+
+/* ==========================================================================
+   PANTALLA 2: ESCANEAR QR
+   ========================================================================== */
+.camera-scanner-container {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: var(--color-camera-bg);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.camera-viewfinder-frame {
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid var(--color-camera-border);
+  border-radius: 20px;
+  background-color: var(--color-camera-inner);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.scanner-laser-beam {
+  position: absolute;
+  top: 0;
+  left: 5%;
+  width: 90%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--color-lime), transparent);
+  box-shadow: 0 0 15px var(--color-lime), 0 0 30px var(--color-lime);
+  border-radius: 50%;
+  animation: laserScan 2.2s ease-in-out infinite alternate;
+  display: none;
+}
+
+@keyframes laserScan {
+  0% { top: 8%; opacity: 0.8; }
+  100% { top: 88%; opacity: 0.8; }
+}
+
+.qr-preview-dummy {
+  width: 110px;
+  height: 110px;
+  opacity: 0.25;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  pointer-events: none;
+}
+
+.qr-dummy-block {
+  background-color: var(--color-lime);
+  border-radius: 3px;
+}
+
+.scan-instructions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.instruction-row {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
+
+.instruction-step {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  min-width: 22px;
+}
+
+.instruction-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: #4A514D;
+  line-height: 1.35;
+}
+
+/* ==========================================================================
+   PANTALLA 3: TU TICKET (PENDIENTE DE PAGO)
+   ========================================================================== */
+.ticket-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  margin-bottom: 24px;
+}
+
+.badge-pending {
+  background-color: var(--color-badge-pending-bg);
+  color: var(--color-badge-pending-text);
+}
+
+.badge-pending .badge-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--color-badge-pending-text);
+  border-radius: 50%;
+}
+
+.ticket-header-group {
+  margin-bottom: 4px;
+}
+
+.ticket-code-id {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.8px;
+  margin-bottom: 6px;
+}
+
+.ticket-entry-meta {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.ticket-metric-block {
+  padding: 4px 0;
+}
+
+.metric-label-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.metric-huge-value {
+  font-size: 58px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+}
+
+.ticket-actions-row {
+  margin-top: 26px;
+}
+
+/* ==========================================================================
+   PANTALLA 4: SIMULAR PAGO (TRANSACCIÓN)
+   ========================================================================== */
+.summary-table-section {
+  margin-bottom: 24px;
+}
+
+.summary-heading {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: 20px;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+
+.summary-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.summary-total-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0 32px 0;
+}
+
+.total-tag-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #555C57;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.total-huge-amount {
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -1px;
+}
+
+/* ==========================================================================
+   PANTALLA 5: TICKET PAGADO (PAGO COMPLETADO)
+   ========================================================================== */
+.badge-completed {
+  background-color: var(--color-lime);
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 12px rgba(206, 248, 71, 0.4);
+}
+
+.badge-completed svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--color-text-primary);
+  stroke-width: 3.5;
+}
+
+.paid-timestamp-value {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.6px;
+}
+
+/* ==========================================================================
+   PANTALLA 6: ESTATUS (TIEMPO RESTANTE Y DEUDA DE PAGO)
+   ========================================================================== */
+.status-toggle-bar {
+  display: flex;
+  background: var(--color-surface-gray);
+  padding: 4px;
+  border-radius: 14px;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.status-toggle-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.status-toggle-btn.active {
+  background: #FFFFFF;
+  color: var(--color-text-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.status-card-box {
+  background-color: var(--color-surface-gray);
+  border-radius: var(--radius-card);
+  padding: 22px 20px;
+  margin-bottom: 20px;
+  position: relative;
+  border: 1px solid var(--color-border-subtle);
+}
+
+.status-card-box.paid-theme {
+  border-color: rgba(206, 248, 71, 0.5);
+  background: linear-gradient(180deg, #F9FDF0 0%, #F5F6F4 100%);
+}
+
+.status-card-box.unpaid-theme {
+  border-color: rgba(184, 50, 50, 0.2);
+  background: linear-gradient(180deg, #FCF5F5 0%, #F5F6F4 100%);
+}
+
+.status-detail-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.status-row-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.status-row-item .label {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.status-row-item .val {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.status-notice-banner {
+  padding: 14px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.notice-paid {
+  background: rgba(206, 248, 71, 0.25);
+  color: #1A311E;
+}
+
+.notice-unpaid {
+  background: rgba(184, 50, 50, 0.1);
+  color: var(--color-alert-unpaid-text);
+}
+
+/* ==========================================================================
+   FLOATING BOTTOM NAVIGATION (INICIO · QR · ESTATUS)
+   ========================================================================== */
+.phone-bottom-nav {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  height: 60px;
+  background-color: var(--color-surface-gray);
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+  z-index: 80;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.nav-tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-family);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #242A27;
+  cursor: pointer;
+  border-radius: 24px;
+  transition: all 0.2s ease;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.nav-tab-item.active {
+  background-color: var(--color-lime);
+  color: var(--color-text-primary);
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(206, 248, 71, 0.4);
+}
+
+.nav-tab-item:hover:not(.active) {
+  color: #000000;
+}
+
+/* ==========================================================================
+   TRANSICIONES DE PANTALLA
+   ========================================================================== */
+.screen-view {
+  display: none;
+  animation: fadeInScreen 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.screen-view.active-screen {
+  display: block;
+}
+
+@keyframes fadeInScreen {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Toast flotante (Posicionado en la parte inferior sobre la barra de navegación) */
+.toast-notification {
+  position: absolute;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%) translateY(24px);
+  background: #111815;
+  color: #FFFFFF;
+  padding: 12px 22px;
+  border-radius: 30px;
+  border: 1px solid rgba(206, 248, 71, 0.25);
+  font-size: 13.5px;
+  font-weight: 700;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+  z-index: 900;
+  white-space: nowrap;
+  max-width: 90%;
+}
+
+.toast-notification.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-notification .toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-lime);
+  box-shadow: 0 0 8px var(--color-lime);
+}
+
+/* ==========================================================================
+   DISPLAY DE CÓDIGO QR GENERADO (TICKET Y SALIDA)
+   ========================================================================== */
+.ticket-qr-display-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  background: #FFFFFF;
+  border-radius: 20px;
+  border: 1px solid var(--color-border-subtle);
+  margin: 14px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.ticket-qr-display-card canvas {
+  border-radius: 8px;
+  max-width: 170px;
+  max-height: 170px;
+  width: 100%;
+  height: auto;
+}
+
+.qr-scan-hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* ==========================================================================
+   BÚSQUEDA Y ENTRADA MANUAL DE TICKET
+   ========================================================================== */
+.manual-ticket-box {
+  margin-top: 16px;
+  background: var(--color-surface-gray);
+  border-radius: 18px;
+  padding: 14px;
+  border: 1px solid var(--color-border-subtle);
+}
+
+.manual-ticket-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.manual-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.manual-ticket-input {
+  flex: 1;
+  background: #FFFFFF;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.manual-ticket-input:focus {
+  border-color: #111815;
+}
+
+.manual-ticket-btn {
+  background: var(--color-text-primary);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   BANNER DE TICKET ACTIVO EN EL ESCÁNER
+   ========================================================================== */
+.active-ticket-scanner-banner {
+  background: #1A2420;
+  border: 1px solid rgba(206, 248, 71, 0.35);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.active-banner-content {
+  flex: 1;
+}
+
+.active-banner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--color-brand-green);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-brand-green);
+  animation: pulse-dot 1.8s infinite;
+}
+
+.active-banner-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: block;
+}
+
+.active-banner-desc {
+  font-size: 11.5px;
+  color: #9AAEA6;
+  margin: 3px 0 0 0;
+  line-height: 1.35;
+}
+
+.btn-banner-action {
+  background: var(--color-brand-green);
+  color: #111815;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-family: var(--font-family);
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-banner-action:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   MODAL DE BLOQUEO: NO SE PERMITE OTRO TICKET
+   ========================================================================== */
+.custom-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 324px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  animation: modalPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-icon-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px auto;
+}
+
+.modal-icon-badge.warning {
+  background: rgba(184, 50, 50, 0.12);
+  color: #B83232;
+}
+
+.modal-icon-badge.info {
+  background: rgba(47, 77, 32, 0.12);
+  color: #2F4D20;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111815;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
+}
+
+.modal-ticket-chip {
+  display: inline-block;
+  background: #F1F4F2;
+  border: 1px solid #DCE3DF;
+  color: #111815;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.modal-description {
+  font-size: 13px;
+  color: #586962;
+  line-height: 1.45;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.modal-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-modal-secondary {
+  background: #FBF1F1;
+  border: 1px solid rgba(184, 50, 50, 0.25);
+  color: #B83232;
+  border-radius: var(--radius-btn);
+  padding: 12px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-secondary:hover {
+  background: #F5E2E2;
+}
+
+.btn-modal-ghost {
+  background: transparent;
+  border: none;
+  color: #586962;
+  border-radius: var(--radius-btn);
+  padding: 10px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-modal-ghost:hover {
+  color: #111815;
+}
+
+/* Botón destacado para finalizar estancia */
+.btn-finalize-stay {
+  width: 100%;
+  background: #111815;
+  color: #CEF847;
+  border: 1.5px solid rgba(206, 248, 71, 0.4);
+  border-radius: var(--radius-btn);
+  padding: 14px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-finalize-stay:hover {
+  background: #1A2420;
+  border-color: #CEF847;
+  transform: translateY(-1px);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive para dispositivos móviles */
+@media (max-width: 480px) {
+  body {
+    padding: 0;
+    background-color: #000000;
+  }
+  
+  .phone-mockup-frame {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+  }
+  
+  .phone-screen {
+    border-radius: 0;
+    padding-top: env(safe-area-inset-top, 16px);
+  }
+
+  .phone-status-bar {
+    display: none !important;
+  }
+}
+

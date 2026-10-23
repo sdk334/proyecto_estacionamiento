@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lime_primary">#CEF847</color>
+    <color name="dark_surface">#111815</color>
+    <color name="brand_green">#183424</color>
+    <color name="bg_white">#FFFFFF</color>
+</resources>

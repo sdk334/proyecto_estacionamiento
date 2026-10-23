@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Park10" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Barra de estado y navegación adaptadas al diseño de la app -->
+        <item name="android:statusBarColor">@color/bg_white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/bg_white</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="colorPrimary">@color/lime_primary</item>
+        <item name="colorOnPrimary">@color/dark_surface</item>
+    </style>
+</resources>

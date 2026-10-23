@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "125341678605",
+    "project_id": "park10-iot-31384",
+    "storage_bucket": "park10-iot-31384.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125341678605:android:158d89a0d4ded227882944",
+        "android_client_info": {
+          "package_name": "com.park10.iot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAmKEn5srOFJl3RYAFztd5x2YujGZegj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125341678605:android:c535f936f772a595882944",
+        "android_client_info": {
+          "package_name": "com.park10.totem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAmKEn5srOFJl3RYAFztd5x2YujGZegj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
