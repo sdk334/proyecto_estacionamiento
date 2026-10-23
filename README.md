@@ -4,7 +4,7 @@ Aplicación de control de estacionamiento por código QR desarrollada en **HTML5
 
 ---
 
-## Funciones Reales Implementadas (Sin Simulación)
+## Funciones Reales Implementadas
 
 ### 1. Lector de Cámara QR Real y Decodificación de Fotos (`qr-scanner.js`):
 - **Cámara física:** Accede a la cámara trasera real del dispositivo mediante `navigator.mediaDevices.getUserMedia` con autofoco.
