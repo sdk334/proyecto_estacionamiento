@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+   DASHBOARD DEL ESTACIONAMIENTO INTELIGENTE
+  ============================================================
+   USUARIO:     admin
+   CONTRASEÑA:  estacionamiento
+   (se cambian en la sección JS-1 de este archivo)
+   La dirección de la base de datos (Firebase) se configura en JS-1 (solo la toca el técnico).
+
+   Esta carpeta tiene 2 archivos:
+     index.html   -> estructura (HTML) y funcionamiento (JavaScript)  <- ábrelo con doble clic
+     estilos.css  -> colores y diseño (CSS)
+
+   Secciones de index.html:
+     HTML-A Login · HTML-B Panel · HTML-C Ventana emergente
+     JS-1 Configuración · JS-2 Estado · JS-3 Bitácora · JS-4 Login
+     JS-5 Mapa en U · JS-6 Cambiar estado · JS-7 Conexión con el sistema (Firebase)
+     JS-8 Órdenes del encargado · JS-9 Reloj · JS-10 Arranque
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estacionamiento inteligente</title>
+
+<link rel="stylesheet" href="estilos.css">
+</head>
+
+<body>
+<!-- ===================== HTML ===================== -->
+
+<!-- ---- HTML-A · LOGIN (lo primero que se ve) ---- -->
+<section id="login">
+  <div class="caja-login">
+    <h1>Estacionamiento inteligente</h1>
+    <p>Inicia sesión para entrar al panel.</p>
+    <label>Usuario <input id="inUsuario" autocomplete="username"></label>
+    <label>Contraseña <input id="inClave" type="password" autocomplete="current-password"></label>
+    <div id="loginError"></div>
+    <button class="principal" id="btnEntrar" style="width:100%">Entrar</button>
+    <p style="margin-top:14px;font-size:13px">Usuario: <b>admin</b> · Contraseña: <b>estacionamiento</b></p>
+  </div>
+</section>
+
+<!-- ---- HTML-B · PANEL (aparece después de iniciar sesión) ---- -->
+<section id="panel" class="oculto">
+
+  <!-- B1 · Encabezado: título + fecha/hora (izquierda) · estado + cerrar sesión (derecha) -->
+  <header>
+    <!-- Izquierda: título y, debajo, fecha y hora -->
+    <div class="enc-izq">
+      <h1>Panel del estacionamiento</h1>
+      <div class="reloj"><span id="fecha"></span> · <b id="hora">--:--:--</b></div>
+    </div>
+    <!-- Derecha: estado del sistema y botón de cerrar sesión -->
+    <div class="enc-der">
+      <span id="conexion" class="insignia">● Conectando…</span>
+      <button id="btnSalir">Cerrar sesión</button>
+    </div>
+  </header>
+  <div id="aviso" class="aviso oculto">⚠ Se detectó un error en el sistema. Los datos pueden no estar actualizados. Avisa a soporte.</div>
+
+  <main>
+    <!-- B2 · Estadísticas -->
+    <div class="estadisticas">
+      <div class="dato"><span>Disponibles</span><b id="stLibres" style="color:var(--libre)">0</b></div>
+      <div class="dato"><span>No disponibles</span><b id="stNoDisp">0</b></div>
+      <div class="dato"><span>Ocupados</span><b id="stOcupados" style="color:var(--ocupado)">0</b></div>
+      <div class="dato"><span>En mantenimiento</span><b id="stMant" style="color:var(--mant)">0</b></div>
+      <div class="dato"><span>Entradas de hoy</span><b id="stEntradas">0</b></div>
+    </div>
+
+    <div class="columnas">
+      <!-- B3 · Mapa en U (los lugares se dibujan desde JS-5) -->
+      <div class="panel">
+        <h2>Mapa de lugares (vista desde arriba)</h2>
+        <div class="mapa" id="mapa"></div>
+        <div class="leyenda">
+          <span><i class="punto" style="background:var(--libre)"></i>Libre</span>
+          <span><i class="punto" style="background:var(--ocupado)"></i>Ocupado</span>
+          <span><i class="punto" style="background:var(--mant)"></i>Mantenimiento</span>
+        </div>
+        <p style="text-align:center;color:var(--gris);font-size:13px">Toca un lugar para cambiar su estado.</p>
+      </div>
+
+      <div>
+        <!-- B4 · Plumillas -->
+        <div class="panel" style="margin-bottom:18px">
+          <h2>Plumillas</h2>
+          <div class="pluma" id="plumaEnt">
+            <div><b>Entrada</b><span id="txtEnt">Cerrada</span></div><div class="barra"></div>
+            <button class="principal" id="btnEnt" style="width:100%">Levantar plumilla de entrada</button>
+          </div>
+          <div class="pluma" id="plumaSal">
+            <div><b>Salida</b><span id="txtSal">Cerrada</span></div><div class="barra"></div>
+            <button class="principal" id="btnSal" style="width:100%">Levantar plumilla de salida</button>
+          </div>
+        </div>
+
+        <!-- B5 · Bitácora -->
+        <div class="panel"><h2>Bitácora</h2><ul id="bitacora"></ul></div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- ---- HTML-C · VENTANA EMERGENTE para cambiar el estado de un lugar ---- -->
+<div id="modal" class="oculto"><div class="caja">
+  <b id="modalTitulo"></b>
+  <button data-estado="libre">Libre</button>
+  <button data-estado="ocupado">Ocupado</button>
+  <button data-estado="mantenimiento">Mantenimiento</button>
+  <button data-estado="auto">Automático (manda el sensor)</button>
+  <button id="btnCancelar">Cancelar</button>
+</div></div>
+
+
+<script>
+/* ===================== JAVASCRIPT ===================== */
+
+/* ---- JS-1 · CONFIGURACIÓN (lo único que normalmente cambias) ---- */
+const USUARIO    = "admin";
+const CONTRASENA = "estacionamiento";
+/* Solo para el técnico (el encargado nunca ve esto en pantalla): */
+const DB_URL = "https://park10-iot-31384-default-rtdb.firebaseio.com";   // misma base que las apps y el ESP32
+const SEGUNDOS_SIN_LATIDO = 15;               // si el sistema no da señales en este tiempo => error
+
+const $ = id => document.getElementById(id);   // atajo: $("hora") = document.getElementById("hora")
+
+/* ---- JS-2 · ESTADO (los datos que el panel dibuja) ---- */
+const NOMBRES = ["libre", "ocupado", "mantenimiento"];   // estados posibles de un lugar
+let estado = {
+  lugares:  Array(10).fill("libre"),   // estado de los 10 lugares
+  entradas: 0,                         // entradas de hoy
+  bitacora: []                         // últimos eventos
+};
+
+/* ---- JS-3 · BITÁCORA ---- */
+function anotar(mensaje) {
+  estado.bitacora.unshift(new Date().toLocaleTimeString("es-MX") + " · " + mensaje);
+  estado.bitacora = estado.bitacora.slice(0, 30);          // guarda solo los últimos 30
+  $("bitacora").innerHTML = estado.bitacora.map(l => "<li>" + l + "</li>").join("");
+}
+
+/* ---- JS-4 · LOGIN ---- */
+function iniciarSesion() {
+  if ($("inUsuario").value.trim() === USUARIO && $("inClave").value === CONTRASENA) {
+    $("login").classList.add("oculto");
+    $("panel").classList.remove("oculto");
+    dibujarPanel();
+  } else {
+    $("loginError").textContent = "Usuario o contraseña incorrectos.";
+  }
+}
+function cerrarSesion() {
+  $("panel").classList.add("oculto");
+  $("login").classList.remove("oculto");
+  $("inClave").value = "";
+}
+$("btnEntrar").onclick = iniciarSesion;
+$("inClave").onkeydown = e => { if (e.key === "Enter") iniciarSesion(); };   // Enter también entra
+$("btnSalir").onclick = cerrarSesion;
+
+/* ---- JS-5 · MAPA EN U Y ESTADÍSTICAS ---- */
+/* Posición [fila, columna] de cada lugar en la cuadrícula de 4x4:
+   lugares 1-3 bajan por la izquierda, 4-7 cruzan por abajo, 8-10 suben por la derecha.
+   Si tu maqueta está en otro orden, cambia estos números. */
+const POS = [[1,1],[2,1],[3,1],[4,1],[4,2],[4,3],[4,4],[3,4],[2,4],[1,4]];
+
+function dibujarPanel() {
+  // Estadísticas: contamos cuántos lugares hay de cada estado
+  const libres   = estado.lugares.filter(e => e === "libre").length;
+  const ocupados = estado.lugares.filter(e => e === "ocupado").length;
+  const mant     = estado.lugares.filter(e => e === "mantenimiento").length;
+  $("stLibres").textContent   = libres;
+  $("stOcupados").textContent = ocupados;
+  $("stMant").textContent     = mant;
+  $("stNoDisp").textContent   = ocupados + mant;       // no disponibles = ocupados + mantenimiento
+  $("stEntradas").textContent = estado.entradas;
+
+  // Mapa: un botón por lugar, colocado en su fila/columna
+  let html = '<div class="centro-mapa">Área de circulación</div>';
+  estado.lugares.forEach((e, i) => {
+    html += '<button class="lugar ' + e + '" style="grid-row:' + POS[i][0] + ';grid-column:' + POS[i][1] +
+            '" data-i="' + i + '"><em>' + (i + 1) + '</em><small>' + e + '</small></button>';
+  });
+  $("mapa").innerHTML = html;
+  document.querySelectorAll(".lugar").forEach(b => b.onclick = () => abrirVentana(+b.dataset.i));
+}
+
+/* ---- JS-6 · CAMBIAR EL ESTADO DE UN LUGAR ---- */
+let lugarElegido = null;
+function abrirVentana(i) {
+  lugarElegido = i;
+  $("modalTitulo").textContent = "Lugar " + (i + 1) + " (ahora: " + estado.lugares[i] + ")";
+  $("modal").classList.remove("oculto");
+}
+document.querySelectorAll("#modal [data-estado]").forEach(b => b.onclick = () => {
+  cambiarLugar(lugarElegido, b.dataset.estado);
+  $("modal").classList.add("oculto");
+});
+$("btnCancelar").onclick = () => $("modal").classList.add("oculto");
+
+/* ---- JS-7 · CONEXIÓN CON EL SISTEMA (Firebase) ----
+   Firebase es el "pizarrón" compartido: el sistema del estacionamiento escribe ahí lo que
+   detectan los sensores y este panel lo lee; las órdenes del encargado viajan al revés.
+   Rutas usadas (todas bajo /parking):
+     spots/01..10  {sensor, manual}   status/latido   status/plumillas
+     stats {entradasHoy, dia}         commands/gate_entrada | gate_salida
+   El encargado solo ve "En vivo" o un error genérico; el detalle va a la consola (F12). */
+const pad = n => String(n).padStart(2, "0");
+const urlNodo = ruta => DB_URL + "/parking/" + ruta + ".json";
+
+async function leer(ruta) {                               // GET: lee un nodo
+  const r = await fetch(urlNodo(ruta));
+  if (!r.ok) throw new Error("HTTP " + r.status + " en " + ruta);
+  return r.json();
+}
+async function escribir(metodo, ruta, datos) {            // PUT (reemplaza) o PATCH (cambia solo esos campos)
+  const r = await fetch(urlNodo(ruta), { method: metodo, headers: { "Content-Type": "application/json" }, body: JSON.stringify(datos) });
+  if (!r.ok) throw new Error("HTTP " + r.status + " en " + ruta);
+}
+function hoyTexto() { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+
+// Insignia y aviso del encabezado (estado del sistema)
+let enError = false;
+function mostrarEstadoSistema(ok) {
+  const marca = $("conexion");
+  marca.textContent = ok ? "● En vivo · " + new Date().toLocaleTimeString("es-MX") : "● Error en el sistema";
+  marca.style.color = ok ? "var(--libre)" : "var(--ocupado)";
+  $("aviso").classList.toggle("oculto", ok);
+  $("panel").classList.toggle("sin-datos", !ok);
+  if (!ok && !enError) anotar("Error en el sistema");
+  if (ok && enError)   anotar("Sistema restablecido");
+  enError = !ok;
+}
+function mostrarConectando() {
+  $("conexion").textContent = "● Conectando…";
+  $("conexion").style.color = "var(--gris)";
+}
+
+// LEE todo cada segundo (ver JS-10).
+let huellaAnterior = "", fallosSeguidos = 0;
+let latidoVisto = null, cambiosLatido = 0, tLatido = Date.now(), tInicio = Date.now();
+const enviadas = { entrada: null, salida: null };         // órdenes esperando respuesta
+async function leerEstado() {
+  try {
+    const [spots, status, stats, cmds] = await Promise.all([leer("spots"), leer("status"), leer("stats"), leer("commands")]);
+    fallosSeguidos = 0;
+
+    // 1) ¿Está vivo el sistema? Su "latido" debe seguir cambiando (se compara contra nuestro reloj, no el del servidor)
+    const latido = status && status.latido;
+    if (latido !== latidoVisto) { if (latidoVisto !== null) cambiosLatido++; latidoVisto = latido; tLatido = Date.now(); }
+    const vivo      = cambiosLatido >= 1 && Date.now() - tLatido < SEGUNDOS_SIN_LATIDO * 1000;
+    const buscando  = cambiosLatido < 1 && Date.now() - tInicio < SEGUNDOS_SIN_LATIDO * 1000;
+    if (buscando) mostrarConectando(); else mostrarEstadoSistema(vivo);
+
+    // 2) Estado de cada lugar: lo manual (si existe) manda; si no, el sensor
+    const nuevos = [];
+    for (let i = 1; i <= 10; i++) {
+      const s = (spots && spots[pad(i)]) || {};
+      nuevos.push(NOMBRES.includes(s.manual) ? s.manual : (s.sensor === true ? "ocupado" : "libre"));
+    }
+    nuevos.forEach((e, i) => { if (huellaAnterior && estado.lugares[i] !== e) anotar("Lugar " + (i + 1) + " → " + e); });
+    estado.lugares = nuevos;
+
+    // 3) Entradas de hoy (si el contador es de otro día, hoy van 0)
+    estado.entradas = (stats && stats.dia === hoyTexto()) ? (stats.entradasHoy || 0) : 0;
+
+    // 4) Plumillas
+    const pl = (status && status.plumillas) || {};
+    [["plumaEnt", "txtEnt", pl.entrada], ["plumaSal", "txtSal", pl.salida]].forEach(([caja, txt, abierta]) => {
+      $(caja).classList.toggle("abierta", abierta === true);
+      $(txt).textContent = abierta === true ? "Abierta" : "Cerrada";
+    });
+
+    // 5) Respuesta a las órdenes de plumilla que mandó el encargado
+    ["entrada", "salida"].forEach(tipo => {
+      const env = enviadas[tipo], c = cmds && cmds["gate_" + tipo];
+      if (!env) return;
+      if (c && c.resultado && c.timestamp === env.ts) {
+        const msg = { ok: "Plumilla de " + tipo + " levantada", lleno: "Entrada rechazada: estacionamiento lleno", abierta: "La plumilla de " + tipo + " ya estaba abierta" };
+        anotar(msg[c.resultado] || "Orden de " + tipo + " procesada");
+        enviadas[tipo] = null;
+      } else if (Date.now() - env.ts > 8000) {
+        anotar("No se pudo completar la acción en la plumilla de " + tipo);
+        enviadas[tipo] = null;
+      }
+    });
+
+    // 6) Redibujar solo si algo cambió (evita parpadeos)
+    const huella = JSON.stringify(nuevos) + estado.entradas;
+    if (huella !== huellaAnterior) { huellaAnterior = huella; dibujarPanel(); }
+  } catch (e) {
+    console.error("Lectura fallida:", e);               // detalle solo para el técnico
+    fallosSeguidos++;
+    if (fallosSeguidos >= 3) mostrarEstadoSistema(false);
+  }
+}
+
+/* ---- JS-8 · ÓRDENES DEL ENCARGADO ---- */
+// Cambiar el estado de un lugar. valor = "libre" | "ocupado" | "mantenimiento" | "auto"
+// "auto" borra la orden manual (null) y vuelve a mandar el sensor.
+async function cambiarLugar(i, valor) {
+  try {
+    await escribir("PATCH", "spots/" + pad(i + 1), { manual: valor === "auto" ? null : valor });
+    anotar("Lugar " + (i + 1) + " → " + (valor === "auto" ? "automático" : valor));
+    leerEstado();
+  } catch (e) {
+    console.error("Cambio de lugar fallido:", e);
+    alert("No se pudo completar la acción. Intenta de nuevo.");
+  }
+}
+
+// Levantar plumilla: se deja una orden en Firebase; el sistema la ejecuta y responde (ver paso 5 de JS-7)
+async function levantarPlumilla(tipo) {                   // tipo = "entrada" o "salida"
+  if (enviadas[tipo]) return;                             // ya hay una orden en camino
+  const ts = Date.now();
+  try {
+    await escribir("PUT", "commands/gate_" + tipo, { trigger: true, timestamp: ts });
+    enviadas[tipo] = { ts };
+  } catch (e) {
+    console.error("Orden de plumilla fallida:", e);
+    alert("No se pudo completar la acción. Intenta de nuevo.");
+  }
+}
+$("btnEnt").onclick = () => levantarPlumilla("entrada");
+$("btnSal").onclick = () => levantarPlumilla("salida");
+
+/* ---- JS-9 · RELOJ ---- */
+function actualizarReloj() {
+  const ahora = new Date();
+  $("hora").textContent  = ahora.toLocaleTimeString("es-MX");
+  $("fecha").textContent = ahora.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
+/* ---- JS-10 · ARRANQUE ---- */
+setInterval(actualizarReloj, 1000);   actualizarReloj();   // reloj cada segundo
+setInterval(leerEstado, 1000);                             // lee Firebase cada segundo
+</script>
+</body>
+</html>
