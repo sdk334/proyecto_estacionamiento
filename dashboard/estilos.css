@@ -1,14 +1,4 @@
-/* ============================================================
-   ESTILOS DEL DASHBOARD (cómo se VE)
-   Se carga desde index.html con: <link rel="stylesheet" href="estilos.css">
-
-   Índice:
-   CSS-1 Colores · CSS-2 Base · CSS-3 Login · CSS-4 Encabezado
-   CSS-5 Estadísticas · CSS-6 Mapa en U · CSS-7 Plumillas
-   CSS-8 Bitácora · CSS-9 Ventana de cambio de estado
-   ============================================================ */
-
-/* ---- CSS-1 · Colores (cámbialos aquí y cambia todo) ---- */
+/* ---- CSS-1 Colores ---- */
 :root {
   --fondo: #f4f6f9;     /* fondo de la página */
   --tarjeta: #ffffff;   /* fondo de cuadros */
@@ -29,7 +19,7 @@
   }
 }
 
-/* ---- CSS-2 · Base (reglas generales) ---- */
+/* ---- CSS-2 Base (reglas generales) ---- */
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--fondo); color: var(--texto);
        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
@@ -43,7 +33,7 @@ input { font: inherit; width: 100%; padding: 10px; margin: 6px 0 14px;
 .panel { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 16px; }
 .panel h2 { margin: 0 0 12px; font-size: 16px; }
 
-/* ---- CSS-3 · Login ---- */
+/* ---- CSS-3 Login ---- */
 #login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .caja-login { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px;
               padding: 28px; width: 100%; max-width: 360px; }
@@ -51,7 +41,7 @@ input { font: inherit; width: 100%; padding: 10px; margin: 6px 0 14px;
 .caja-login p { color: var(--gris); margin: 0 0 18px; font-size: 14px; }
 #loginError { color: var(--ocupado); font-size: 14px; min-height: 20px; margin-bottom: 8px; }
 
-/* ---- CSS-4 · Encabezado (título, IP, reloj, cerrar sesión) ---- */
+/* ---- CSS-4 Encabezado (título, IP, reloj, cerrar sesión) ---- */
 header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
          padding: 14px 20px; background: var(--tarjeta); border-bottom: 1px solid var(--borde); }
 header h1 { margin: 0; font-size: 18px; }
@@ -67,14 +57,14 @@ main { max-width: 1000px; margin: 0 auto; padding: 20px; display: grid; gap: 18p
 .columnas { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }   /* mapa | plumillas+bitácora */
 @media (max-width: 760px) { .columnas { grid-template-columns: 1fr; } }  /* en celular, una columna */
 
-/* ---- CSS-5 · Estadísticas ---- */
+/* ---- CSS-5 Estadísticas ---- */
 .estadisticas { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
 .dato { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; }
 .dato span { display: block; color: var(--gris); font-size: 13px; }
 .dato b { font-size: 28px; }
 
-/* ---- CSS-6 · Mapa en U ---- */
-/* Cuadrícula de 4 columnas x 4 filas. Cada lugar se coloca con grid-row y grid-column (ver POS en JS-5) */
+/* ---- CSS-6 Mapa en U ---- */
+/* Cuadrícula de 4 columnas x 4 filas. Cada lugar se coloca con grid-row y grid-column */
 .mapa { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 76px);
         gap: 8px; max-width: 460px; margin: 0 auto; }
 .lugar { border-radius: 10px; border: 2px solid; display: flex; flex-direction: column;
@@ -90,17 +80,17 @@ main { max-width: 1000px; margin: 0 auto; padding: 20px; display: grid; gap: 18p
            font-size: 13px; color: var(--gris); }
 .punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
 
-/* ---- CSS-7 · Plumillas ---- */
+/* ---- CSS-7 Plumillas ---- */
 .pluma { border: 1px solid var(--borde); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
 .pluma > div { display: flex; justify-content: space-between; align-items: center; }
 .pluma .barra { height: 6px; border-radius: 3px; background: var(--ocupado); margin: 8px 0; transition: background .3s; }
 .pluma.abierta .barra { background: var(--libre); }       /* verde cuando está abierta */
 
-/* ---- CSS-8 · Bitácora ---- */
+/* ---- CSS-8 Bitácora ---- */
 #bitacora { list-style: none; margin: 0; padding: 0; max-height: 180px; overflow-y: auto; font-size: 13px; color: var(--gris); }
 #bitacora li { padding: 4px 0; border-bottom: 1px solid var(--borde); }
 
-/* ---- CSS-9 · Ventana de cambio de estado ---- */
+/* ---- CSS-9 Ventana de cambio de estado ---- */
 #modal { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex;
          align-items: center; justify-content: center; padding: 20px; }
 #modal .caja { background: var(--tarjeta); border-radius: 14px; padding: 20px; width: 100%; max-width: 300px; display: grid; gap: 8px; }
